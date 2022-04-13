@@ -11,19 +11,21 @@ import java.util.Scanner;
 
 import BD.BancoConf;
 import Exception.Excecao;
-import entities.Funcionario;
+
 
 public class Program {
 
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
-		Funcionario funcionario = null;
+		
 		Connection conecta = null;
 		PreparedStatement ps = null;
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		char confirm = 0;
+		
+		try {
 		do {
-				try {
+				
 				conecta = BancoConf.ConectaBD();
 				ps = conecta.prepareStatement("INSERT INTO funcionario"
 						+ "(Nome,DataNascimento,CPF,Email,CARGO)"
@@ -52,7 +54,7 @@ public class Program {
 					String cargo = sc.nextLine();
 					System.out.println("");
 					
-					new Funcionario(nome, aniversaior, cpf, email, cargo);
+			
 					
 					
 						ps.setString(1,nome);
@@ -71,23 +73,68 @@ public class Program {
 						System.out.println("Done!" + id);
 						}
 					}
-				System.out.println("Gostaria de adiciona mais:sim(s) ou Não(n) ");
-				 confirm = sc.next().charAt(0);
-				
-				}
+			
+	  
+		 System.out.println("Adiciona Endereço aos funcionarios ");
+	 
+
+			 
+		 ps =conecta.prepareStatement("INSERT INTO ENDERECO"
+		 		+ "(RUA,BAIRRO,CEP,ID_FUNCIONARIO)"
+		 		+ "VALUES"
+		 		+ "(?,?,?,?)",Statement.RETURN_GENERATED_KEYS);
 		 
-		  catch(SQLException e) {
+		  System.out.print("Nome da rua:");
+		  String rua = sc.nextLine();
+		  sc.nextLine();
+		  
+		  System.out.print("Nome do bairro");
+		  String bairro = sc.nextLine();
+		  sc.nextLine();
+		  
+		  System.out.print("Cep");
+		  String cep = sc.nextLine();
+		  sc.nextLine();
+		  
+		  System.out.print("ID do funcionario");
+		  int id = sc.nextInt();
+		  
+		  
+		  ps.setNString(1,rua);
+		 ps.setString(2,bairro);
+		  ps.setString(3, cep);
+		  ps.setInt(4, id);
+		  
+		  
+		  int conrf = ps.executeUpdate();
+		  
+		  if(conrf >0) {
+			  ResultSet a = ps.getGeneratedKeys();
+			  while(a.next()) {
+				  int id1 = a.getInt(1);
+				  System.out.print("Feito" + id1);
+				  System.out.println();
+			  }
+		  }
+		  System.out.print("Gostaria de adiciona mais funciona e endereço (s) para sim e (n) para não");
+		  confirm = sc.next().charAt(0);
+		      	  
+		} while(confirm == 's'); 
+		
+		}catch(SQLException e) {
+			
 			throw new Excecao(e.getMessage());
-		}catch(ParseException e) {
+			
+		}catch(ParseException e)
+		{
 			e.getStackTrace();
-		}
-		
-		
-	} while(confirm =='s');
-		
-	 if(confirm =='n') {
-		 BancoConf.desconectaStatement(ps);
-		 BancoConf.DesconectaBD();
-	}
-	}
+	
+	 }finally{
+			BancoConf.desconectaStatement(ps);
+			BancoConf.DesconectaBD();
+	 
+	 	}
 }
+	
+}
+
